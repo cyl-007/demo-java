@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb-cluster-b6t4rn-mariadb-master
+  namespace: tpaas-ns-4758e-788e6
+  labels:
+    tpaas-app: '39'
+    tpaas-controller-kind: statefulset
+    tpaas-name: mariadb-cluster-b6t4rn-mariadb-master   
+    tpaas-ns: '18'
+  annotations:
+    tpaas.cloud/create-user: xiangmu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tpaas-app: '39'
+      tpaas-controller-kind: statefulset
+      tpaas-name: mariadb-cluster-b6t4rn-mariadb-master
+      tpaas-ns: '18'
+  template:
+    metadata:
+      labels:
+        tpaas-app: '39'
+        tpaas-controller-kind: statefulset
+        tpaas-name: mariadb-cluster-b6t4rn-mariadb-master
+        tpaas-ns: '18'
+      annotations:
+        tpaas.cloud/container-secrets: '{}'
+        tpaas.cloud/create-user: 1
+        tpaas.cloud/logs: '{}'
+    spec:
+      volumes:
+        - name: test
+          persistentVolumeClaim:
+            claimName: volume1
+      containers:
+        - name: container1
+          image: tomcat
+          resources:
+            limits:
+              cpu: '1'
+              memory: 1000Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          volumeMounts:
+            - name: test
+              mountPath: /mnt
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        creationTimestamp: null
+        labels:
+          app: mariadb-cluster
+          chart: mariadb-cluster-1.0.1
+          component: master
+          heritage: Helm
+          release: mariadb-cluster-b6t4rn
+          tpaas-app: '39'
+          tpaas-controller-kind: statefulset
+          tpaas-name: mariadb-cluster-b6t4rn-mariadb-master
+          tpaas-ns: '18'
+          tpaas-release: mariadb-cluster-b6t4rn
+          tpaas-release-type: helm
+        annotations:
+          tpaas.cloud/create-user: xiangmu
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  serviceName: mariadb-cluster-b6t4rn-mariadb-master
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 10

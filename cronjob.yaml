@@ -1,0 +1,88 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: 'cronjob-rollupdatekubtest1'
+  namespace: tpaas-ns-459d9-fcad6
+  labels:
+    tpaas-app: '2'
+    tpaas-controller-kind: cronjob
+    tpaas-name: '11'
+    tpaas-ns: '4'
+  annotations:
+    tpaas.cloud/create-user: admin
+spec:
+  schedule: '*/1 * * * *'
+  concurrencyPolicy: Allow
+  suspend: false
+  jobTemplate:
+    metadata:
+      labels:
+        tpaas-app: '2'
+        tpaas-controller-kind: cronjob
+        tpaas-name: '11'
+        tpaas-ns: '4'
+      annotations:
+        tpaas.cloud/create-user: admin
+    spec:
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          labels:
+            tpaas-app: '2'
+            tpaas-controller-kind: cronjob
+            tpaas-name: '11'
+            tpaas-ns: '4'
+          annotations:
+            tpaas.cloud/container-secrets: '{}'
+            tpaas.cloud/create-user: admin
+            tpaas.cloud/logs: '{}'
+        spec:
+          containers:
+            - name: container1
+              image: nginx
+              resources:
+                limits:
+                  cpu: '1'
+                  memory: 1000Mi
+                requests:
+                  cpu: 10m
+                  memory: 10Mi
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: IfNotPresent
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          securityContext: {}
+          schedulerName: default-scheduler
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+---
+  apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: deploy-rollupdate
+  name: deploy-rollupdatekubtest1
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0%
+      maxSurge:  100%
+  selector:
+    matchLabels:
+      app: deploy-rollupdate
+  template:
+    metadata:
+      labels:
+        app: deploy-rollupdate
+    spec:
+      containers:
+        - image: 'tomcat'
+          imagePullPolicy: IfNotPresent
+          name: tomcat
+      restartPolicy: Always
+

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: deploy-rollupdate
+  name: deploy-rollupdatekubtest1
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0%
+      maxSurge:  100%
+  selector:
+    matchLabels:
+      app: deploy-rollupdate
+  template:
+    metadata:
+      labels:
+        app: deploy-rollupdate
+    spec:
+      containers:
+        - image: $DEVOPS_IMAGE_FULL_TAG
+          imagePullPolicy: IfNotPresent
+          name: tomcat
+      restartPolicy: Always
